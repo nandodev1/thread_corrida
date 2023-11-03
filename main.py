@@ -8,7 +8,7 @@ import time
 import random
 
 global semaforo
-semaforo = Semaphore(0)
+semaforo = Semaphore(1)
 
 global out
 out = None 
@@ -27,33 +27,44 @@ class Sub_proc(Thread):
     def run(self):
         enviou_arq = False
         stdout.write( self.name + ' Foi iniciado!\n')
+        if self.id == 'A':
+            sleep(1)
+        if self.id == 'B':
+            sleep(1)
         if self.id == 'C':
             sleep(1)
-        while(True):
-            #semaforo.acquire(self)
+        if self.id == 'D':
+            sleep(1)
+        if self.id == 'E':
+            sleep(1)
+        while(enviou_arq == False):
+            #semaforo.acquire()
+            #print( '        ', self.name, ' Esta usando recurso compartilhado')
             if enviou_arq == False:
                 global en
                 self.entrada = en
                 bufferDeInprecao[self.entrada] = self.id
-                stdout.write( self.name + ' enviou arquivo ' + self.id 
-                             + ' para impreção!\n'
-                             )
-                print('        ', bufferDeInprecao)
-                stdout.flush()
                 stdout.write(  self.name 
-                        + ' Entrada: ' 
+                        + ' Slot: ' 
                         + str(self.entrada)
                         + ' Arquivo: '
                         + self.id + '\n')
+                stdout.flush()
+                stdout.write( self.name + ' enviou arquivo ' + self.id 
+                             + ' para impresão!\n'
+                             )
+                print('        ', bufferDeInprecao)
                 stdout.flush()
                 if en > 9:
                     en = 0
                 else:
                     en += 1
-                stdout.write(  self.name + ' Somou indice de entrada!\n')
+                stdout.write(  self.name + ' Somou indice de entrada!\n'
+                + '         Próximo slot livre: ' + str(en) +'\n')
                 stdout.flush()
                 enviou_arq = True
-            #semaforo.release(self)
+            #semaforo.release()
+            #print( '        ', self.name, ' Liberou o recurso compartilhado')
 
 def main():
     threads = []
@@ -65,9 +76,6 @@ def main():
     for sub_proc in threads:
         sub_proc.start()
         stdout.flush()
-    while(en == 5):
-        print(bufferDeInprecao)
-        exit(0)
 
 
 if __name__ == "__main__":
